@@ -1,0 +1,10 @@
+2026-08-25 16:44:42,071 [INFO] LogOutputStream:77 - [STDOUT_REDIRECT] 
+2026-08-25 16:44:43,497 [INFO] ProjectBuilder:5496 - Time for Generating toolchain IDE Files: 2204mS.
+2026-08-25 16:44:43,500 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 2mS.
+2026-08-25 16:44:43,503 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 0mS.
+2026-08-25 16:44:54,373 [ERROR] LogOutputStream:75 - [STDERR_REDIRECT] 
+2026-08-25 16:45:20,622 [INFO] Activator:177 - 
+
+
+2026-08-25 16:45:20,622 [INFO] Activator:178 - !SESSION log4j initialized
+2026-08-25 16:45:35,485 [INFO] LogOutputStream:77 - [STDOUT_REDIRECT] 

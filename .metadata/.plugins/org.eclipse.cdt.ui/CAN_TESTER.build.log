@@ -1,0 +1,20 @@
+13:30:43 **** Build of configuration Debug for project CAN_TESTER ****
+make -j18 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:121:24: error: implicit declaration of function 'snprintf' [-Wimplicit-function-declaration]
+  121 |             int size = snprintf(buff, sizeof(buff),
+      |                        ^~~~~~~~
+../Core/Src/main.c:21:1: note: include '<stdio.h>' or provide a declaration of 'snprintf'
+   20 | #include "main.h"
+  +++ |+#include <stdio.h>
+   21 | 
+../Core/Src/main.c:121:24: warning: incompatible implicit declaration of built-in function 'snprintf' [-Wbuiltin-declaration-mismatch]
+  121 |             int size = snprintf(buff, sizeof(buff),
+      |                        ^~~~~~~~
+../Core/Src/main.c:121:24: note: include '<stdio.h>' or provide a declaration of 'snprintf'
+make: *** [Core/Src/subdir.mk:34: Core/Src/main.o] Error 1
+"make -j18 all" terminated with exit code 2. Build might be incomplete.
+
+13:30:44 Build Failed. 2 errors, 1 warnings. (took 1s.256ms)
+

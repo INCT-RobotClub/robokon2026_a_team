@@ -1,0 +1,10 @@
+13:30:42 **** Build of configuration Debug for project 303_servo ****
+make -j18 all 
+arm-none-eabi-size  303_servo.elf 
+   text	   data	    bss	    dec	    hex	filename
+  23312	    100	   2172	  25584	   63f0	303_servo.elf
+Finished building: default.size.stdout
+ 
+
+13:30:43 Build Finished. 0 errors, 0 warnings. (took 913ms)
+

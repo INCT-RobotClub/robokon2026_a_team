@@ -1,0 +1,12 @@
+13:30:55 **** Build of configuration Debug for project twelite ****
+make -j18 all 
+arm-none-eabi-size  twelite.elf 
+   text	   data	    bss	    dec	    hex	filename
+  20580	     92	   2356	  23028	   59f4	twelite.elf
+process_begin: CreateProcessW(C:\ST\STM32CubeIDE_2.2.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.make.win32_2.2.200.202604021615\tools\bin\echo.exe, echo "Finished building: default.size.stdout", ...) failed.
+make (e=87): �p�����[�^�[���Ԉ���Ă��܂��B
+make: *** [makefile:70: default.size.stdout] Error 87
+"make -j18 all" terminated with exit code 2. Build might be incomplete.
+
+13:30:56 Build Failed. 1 errors, 0 warnings. (took 523ms)
+

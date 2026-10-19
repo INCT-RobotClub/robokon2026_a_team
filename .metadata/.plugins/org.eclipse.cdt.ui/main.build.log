@@ -1,0 +1,24 @@
+13:30:48 **** Build of configuration Debug for project main ****
+make -j18 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:161:36: error: implicit declaration of function 'snprintf' [-Wimplicit-function-declaration]
+  161 |                         int size = snprintf(buff, sizeof(buff), "CNT:%4d | SPD:%3d m/h | CPS:%4d | PWM:%4d \n\r" ,count, currentSpeed,currentCPS,currentPWM);
+      |                                    ^~~~~~~~
+../Core/Src/main.c:21:1: note: include '<stdio.h>' or provide a declaration of 'snprintf'
+   20 | #include "main.h"
+  +++ |+#include <stdio.h>
+   21 | 
+../Core/Src/main.c:161:36: warning: incompatible implicit declaration of built-in function 'snprintf' [-Wbuiltin-declaration-mismatch]
+  161 |                         int size = snprintf(buff, sizeof(buff), "CNT:%4d | SPD:%3d m/h | CPS:%4d | PWM:%4d \n\r" ,count, currentSpeed,currentCPS,currentPWM);
+      |                                    ^~~~~~~~
+../Core/Src/main.c:161:36: note: include '<stdio.h>' or provide a declaration of 'snprintf'
+../Core/Src/main.c: At top level:
+../Core/Src/main.c:54:12: warning: 'preTick2' defined but not used [-Wunused-variable]
+   54 | static int preTick2 = 0;
+      |            ^~~~~~~~
+make: *** [Core/Src/subdir.mk:37: Core/Src/main.o] Error 1
+"make -j18 all" terminated with exit code 2. Build might be incomplete.
+
+13:30:50 Build Failed. 2 errors, 2 warnings. (took 1s.530ms)
+

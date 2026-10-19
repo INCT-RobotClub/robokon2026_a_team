@@ -1,0 +1,46 @@
+2026-08-25 16:44:16,974 [INFO] Mcu:1682 - InternalPropertyChange: try BijectiveRequest:PWM Generation CH2
+2026-08-25 16:44:28,256 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 783410136 Bytes (1073741824)
+2026-08-25 16:44:35,467 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 825879512 Bytes (1073741824)
+2026-08-25 16:44:37,253 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 890364888 Bytes (1073741824)
+2026-08-25 16:44:38,014 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: TIM1_8
+2026-08-25 16:44:38,014 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: SYS
+2026-08-25 16:44:38,014 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: RCC
+2026-08-25 16:44:38,014 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: NVIC
+2026-08-25 16:44:38,014 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: USART
+2026-08-25 16:44:38,014 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: USART
+2026-08-25 16:44:38,014 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: GPIO
+2026-08-25 16:44:38,014 [INFO] CodeGenerator:892 - code generatio: config db path: C:\ST\STM32CubeIDE_1.19.0\STM32CubeIDE\plugins\com.st.stm32cube.common.mx_6.15.0.202507011659\\db\
+2026-08-25 16:44:38,172 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\license.tmp_save
+2026-08-25 16:44:38,603 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\license.tmp
+2026-08-25 16:44:38,740 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\gpio.tmp_save
+2026-08-25 16:44:38,966 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\gpio.tmp
+2026-08-25 16:44:39,278 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Src\stm32f4xx_it.c_save
+2026-08-25 16:44:39,462 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Src\stm32f4xx_it.c
+2026-08-25 16:44:39,485 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\stm32f4xx_it.h_save
+2026-08-25 16:44:39,629 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\stm32f4xx_it.h
+2026-08-25 16:44:39,676 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Src\stm32f4xx_hal_msp.c_save
+2026-08-25 16:44:39,874 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Src\stm32f4xx_hal_msp.c
+2026-08-25 16:44:39,889 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\system.tmp_save
+2026-08-25 16:44:39,951 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\system.tmp
+2026-08-25 16:44:39,975 [INFO] CodeEngine:321 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\stm32f4xx_hal_conf.h_save
+2026-08-25 16:44:40,086 [INFO] CodeEngine:345 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\stm32f4xx_hal_conf.h
+2026-08-25 16:44:40,142 [WARN] IPConfigManager:3238 - Warning: the RefConfig PLL2P_FOR_MCO is not available in your config.xml file
+2026-08-25 16:44:40,203 [INFO] ApiDbMcu:532 - Load IP Config File for TIM1
+2026-08-25 16:44:40,212 [INFO] ApiDbMcu:532 - Load IP Config File for USART1
+2026-08-25 16:44:40,218 [INFO] ApiDbMcu:532 - Load IP Config File for USART2
+2026-08-25 16:44:40,224 [INFO] ApiDbMcu:532 - Load IP Config File for RCC
+2026-08-25 16:44:40,230 [WARN] IPConfigManager:3811 - IP not found : TIM
+2026-08-25 16:44:40,232 [WARN] CodeGenerator:4259 - IP not found : null
+2026-08-25 16:44:40,246 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\main.h_save
+2026-08-25 16:44:40,376 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\main.h
+2026-08-25 16:44:40,394 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Src\main.c_save
+2026-08-25 16:44:40,618 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Src\main.c
+2026-08-25 16:44:41,286 [INFO] ProjectBuilder:3606 - Time for Copy HAL[1] : 407mS.
+2026-08-25 16:44:41,293 [INFO] ProjectBuilder:5216 - Project Generator version: 4.7.0-B52
+2026-08-25 16:44:41,423 [INFO] ConfigFileManager:1595 - The Die is : DIE421
+2026-08-25 16:44:41,433 [INFO] ApiDbMcu:532 - Load IP Config File for FATFS
+2026-08-25 16:44:41,439 [INFO] ApiDbMcu:532 - Load IP Config File for FREERTOS
+2026-08-25 16:44:41,442 [INFO] ApiDbMcu:532 - Load IP Config File for LIBJPEG
+2026-08-25 16:44:41,449 [INFO] ApiDbMcu:532 - Load IP Config File for MBEDTLS
+2026-08-25 16:44:41,455 [INFO] ApiDbMcu:532 - Load IP Config File for USB_DEVICE
+2026-08-25 16:44:41,461 [INFO] ApiDbMcu:532 - Load IP Config File for USB_HOST

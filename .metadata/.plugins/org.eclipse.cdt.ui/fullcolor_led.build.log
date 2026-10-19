@@ -1,0 +1,10 @@
+13:30:47 **** Build of configuration Debug for project fullcolor_led ****
+make -j18 all 
+arm-none-eabi-size  fullcolor_led.elf 
+   text	   data	    bss	    dec	    hex	filename
+  16440	     28	   9740	  26208	   6660	fullcolor_led.elf
+Finished building: default.size.stdout
+ 
+
+13:30:48 Build Finished. 0 errors, 0 warnings. (took 893ms)
+

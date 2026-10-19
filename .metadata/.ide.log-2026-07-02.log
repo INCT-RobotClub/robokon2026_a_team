@@ -1,0 +1,75 @@
+2026-07-02 12:55:32,769 [INFO] WebApp:194 - Connection lost
+2026-07-02 12:55:33,793 [INFO] WebApp:191 - Connection restablished
+2026-07-02 12:55:36,455 [INFO] WebApp:194 - Connection lost
+2026-07-02 12:55:36,678 [INFO] WebApp:191 - Connection restablished
+2026-07-02 12:57:21,847 [INFO] WebApp:194 - Connection lost
+2026-07-02 12:57:22,120 [INFO] WebApp:191 - Connection restablished
+2026-07-02 13:00:19,872 [INFO] WebApp:194 - Connection lost
+2026-07-02 13:00:20,116 [INFO] WebApp:191 - Connection restablished
+2026-07-02 13:01:00,760 [INFO] NvicIntPanel:101 - NVIC parent = com.st.microxplorer.plugins.ip.nvic.MultiNvicIntPanel[,0,0,0x0,invalid,layout=javax.swing.BoxLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]
+2026-07-02 13:02:20,322 [INFO] WebApp:194 - Connection lost
+2026-07-02 13:02:20,571 [INFO] WebApp:191 - Connection restablished
+2026-07-02 13:02:28,488 [INFO] NvicIntPanel:101 - NVIC parent = com.st.microxplorer.plugins.ip.nvic.MultiNvicIntPanel[,0,0,0x0,invalid,layout=javax.swing.BoxLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]
+2026-07-02 13:02:55,086 [INFO] NvicIntPanel:101 - NVIC parent = com.st.microxplorer.plugins.ip.nvic.MultiNvicIntPanel[,0,0,0x0,invalid,layout=javax.swing.BoxLayout,alignmentX=0.0,alignmentY=0.0,border=,flags=9,maximumSize=,minimumSize=,preferredSize=]
+2026-07-02 13:05:22,837 [INFO] WebApp:194 - Connection lost
+2026-07-02 13:05:23,163 [INFO] WebApp:191 - Connection restablished
+2026-07-02 13:05:34,976 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 830064256 Bytes (1073741824)
+2026-07-02 13:05:36,830 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 878208792 Bytes (1073741824)
+2026-07-02 13:05:38,784 [INFO] UtilMem:75 - End SaveConfig() Used Memory: 768371024 Bytes (1073741824)
+2026-07-02 13:05:39,429 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: SYS
+2026-07-02 13:05:39,429 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: RCC
+2026-07-02 13:05:39,429 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: NVIC
+2026-07-02 13:05:39,429 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: USART
+2026-07-02 13:05:39,429 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: USART
+2026-07-02 13:05:39,430 [INFO] BlockDiagram:2775 - set Specific Code input for plugin: GPIO
+2026-07-02 13:05:39,437 [INFO] CodeGenerator:892 - code generatio: config db path: C:\ST\STM32CubeIDE_1.19.0\STM32CubeIDE\plugins\com.st.stm32cube.common.mx_6.15.0.202507011659\\db\
+2026-07-02 13:05:39,667 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\license.tmp_save
+2026-07-02 13:05:40,027 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\license.tmp
+2026-07-02 13:05:40,118 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\gpio.tmp_save
+2026-07-02 13:05:40,330 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\gpio.tmp
+2026-07-02 13:05:40,502 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Src\stm32f4xx_it.c_save
+2026-07-02 13:05:40,889 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Src\stm32f4xx_it.c
+2026-07-02 13:05:40,917 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\stm32f4xx_it.h_save
+2026-07-02 13:05:41,066 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\stm32f4xx_it.h
+2026-07-02 13:05:41,113 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Src\stm32f4xx_hal_msp.c_save
+2026-07-02 13:05:41,352 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Src\stm32f4xx_hal_msp.c
+2026-07-02 13:05:41,373 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\system.tmp_save
+2026-07-02 13:05:41,500 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\MXTmpFiles\system.tmp
+2026-07-02 13:05:41,537 [INFO] CodeEngine:321 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\stm32f4xx_hal_conf.h_save
+2026-07-02 13:05:41,685 [INFO] CodeEngine:345 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\stm32f4xx_hal_conf.h
+2026-07-02 13:05:41,747 [WARN] IPConfigManager:3238 - Warning: the RefConfig PLL2P_FOR_MCO is not available in your config.xml file
+2026-07-02 13:05:41,761 [INFO] ApiDbMcu:532 - Load IP Config File for USART1
+2026-07-02 13:05:41,768 [INFO] ApiDbMcu:532 - Load IP Config File for USART2
+2026-07-02 13:05:41,775 [INFO] ApiDbMcu:532 - Load IP Config File for RCC
+2026-07-02 13:05:41,796 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\main.h_save
+2026-07-02 13:05:41,962 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Inc\main.h
+2026-07-02 13:05:41,987 [INFO] CodeEngine:265 - oldGeneratedFile, C:\Users\hakus\Downloads\robo2026\servo\Core\Src\main.c_save
+2026-07-02 13:05:42,179 [INFO] CodeEngine:289 - Generated code: C:\Users\hakus\Downloads\robo2026\servo\Core\Src\main.c
+2026-07-02 13:05:43,189 [INFO] ProjectBuilder:3606 - Time for Copy HAL[1] : 700mS.
+2026-07-02 13:05:43,197 [INFO] ProjectBuilder:5216 - Project Generator version: 4.7.0-B52
+2026-07-02 13:05:43,344 [INFO] ConfigFileManager:1595 - The Die is : DIE421
+2026-07-02 13:05:43,370 [INFO] ApiDbMcu:532 - Load IP Config File for FATFS
+2026-07-02 13:05:43,381 [INFO] ApiDbMcu:532 - Load IP Config File for FREERTOS
+2026-07-02 13:05:43,390 [INFO] ApiDbMcu:532 - Load IP Config File for LIBJPEG
+2026-07-02 13:05:43,401 [INFO] ApiDbMcu:532 - Load IP Config File for MBEDTLS
+2026-07-02 13:05:43,416 [INFO] ApiDbMcu:532 - Load IP Config File for USB_DEVICE
+2026-07-02 13:05:43,429 [INFO] ApiDbMcu:532 - Load IP Config File for USB_HOST
+2026-07-02 13:05:45,466 [INFO] ProjectBuilder:5496 - Time for Generating toolchain IDE Files: 2268mS.
+2026-07-02 13:05:45,472 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 5mS.
+2026-07-02 13:05:45,477 [INFO] ProjectBuilder:3463 - Time for Copy CMSIS : 0mS.
+2026-07-02 13:14:18,831 [INFO] WebApp:194 - Connection lost
+2026-07-02 13:14:19,120 [INFO] WebApp:191 - Connection restablished
+2026-07-02 13:32:34,308 [INFO] WebApp:194 - Connection lost
+2026-07-02 13:32:34,555 [INFO] WebApp:191 - Connection restablished
+2026-07-02 13:33:40,805 [INFO] WebApp:194 - Connection lost
+2026-07-02 13:33:41,061 [INFO] WebApp:191 - Connection restablished
+2026-07-02 13:41:01,280 [INFO] WebApp:194 - Connection lost
+2026-07-02 13:41:01,478 [INFO] WebApp:191 - Connection restablished
+2026-07-02 14:03:20,755 [INFO] WebApp:194 - Connection lost
+2026-07-02 14:03:20,992 [INFO] WebApp:191 - Connection restablished
+2026-07-02 16:49:55,479 [INFO] WebApp:194 - Connection lost
+2026-07-02 16:49:56,059 [INFO] WebApp:191 - Connection restablished
+2026-07-02 16:49:59,473 [INFO] WebApp:194 - Connection lost
+2026-07-02 16:49:59,749 [INFO] WebApp:191 - Connection restablished
+2026-07-02 16:57:57,707 [INFO] WebApp:194 - Connection lost
+2026-07-02 16:57:58,033 [INFO] WebApp:191 - Connection restablished

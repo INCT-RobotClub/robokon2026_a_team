@@ -1,0 +1,825 @@
+/* USER CODE BEGIN Header */
+/**
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2026 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include <stdio.h>
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+typedef enum {
+	ACT_MOTOR = 0, ACT_SOLENOID, ACT_SERVO, ACT_MACRO
+} ActuatorType;
+
+typedef struct {
+	ActuatorType type; /* Type of actuator (ACT_MOTOR, ACT_SOLENOID, ACT_SERVO) */
+	uint8_t ctrl_idx; /* Controller array index (CTRL_BUTTONS or CTRL_BUTTONS2) */
+	uint8_t btn_mask; /* Button bitmask */
+	uint8_t target_idx; /* Target device index */
+	uint8_t ls_idx; /* Limit switch index to check */
+	int16_t speed; /* Motor speed (0-99), Solenoid state (1=ON), or Servo pulse (us) */
+	uint8_t direction; /* Motor direction (0 or 1) */
+} MechanismConfig;
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+/* CAN Message IDs */
+enum CanId {
+	ROBOMAS_ID = 0x100,
+	MOTOR_ID = 0x200,
+	LS_ID = 0x300,
+	SOLENOID_ID = 0x400,
+	SM_CATCH_ID = 0x500
+};
+
+
+/* Actuator Constants */
+enum MotorConstants {
+	MOTOR_STOP = 0 ,MOTOR_HARF = 50, MOTOR_HIGH = 60, MOTOR_MAX = 99
+};
+
+enum SolenoidConstants {
+	SOLENOID_OFF = 0, SOLENOID_ON = 1
+};
+
+/* Servo pulse width values in microseconds */
+enum ServoPulse {
+	SERVO_HV_REVMAX = 1000,
+	SERVO_HV_STOP = 1500,
+	SERVO_HV_MAX = 2000,
+	SERVO_0 = 550,
+	SERVO_80 = (int) ((950 * 90) / 90 + 550), /* Avoid truncation: multiply first */
+	SERVO_180 = 2400
+};
+
+static const uint32_t TICK_INTERVAL = 10;
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+CAN_HandleTypeDef hcan1;
+
+UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart3;
+
+/* USER CODE BEGIN PV */
+enum {
+	S_FLAG = 0,
+	S_DESK,
+	NUM_SUPPLYS
+};
+
+enum {
+	M_DESK = 0,
+	M_SUPPLY_CLOTH,
+	M_SUPPLY_LR,
+	M_BUCKET_UPDOWN,
+	NUM_MOTORS
+};
+uint8_t motor_PWM[NUM_MOTORS];
+uint8_t motor_DIR[NUM_MOTORS];
+uint8_t prev_motor_PWM[NUM_MOTORS] = { 0 };
+uint8_t prev_motor_DIR[NUM_MOTORS] = { 0 };
+
+enum {
+	S_LSUPER = 0,
+	S_NORMAL,
+	S_RSUPER,
+	NUM_SOLENOIDS
+};
+uint8_t solenoid[NUM_SOLENOIDS];
+uint8_t prev_solenoid[NUM_SOLENOIDS] = { 0 };
+
+enum {
+	LS_BUCKET_UP,
+	LS_BUCKET_BOTTOM,
+	LS_SUPPLY_MAX,
+	LS_SUPPLY_MID,
+	LS_SUPPLY_MIN,
+	LS_SUPPLY_UP,
+	LS_SUPPLY_BOTTOM,
+	LS_NONE,
+	NUM_LS
+};
+uint8_t LS[NUM_LS];
+
+enum {
+	SM_CATCH,
+	SM_CATCH_BUCKET,
+	NUM_SM
+};
+
+int servo[NUM_SM] = { SERVO_80, SERVO_HV_STOP };
+int prev_servo[NUM_SM] = { 0 };
+
+enum {
+	CTRL_BUTTONS2, /* Bits 0~6 */
+	CTRL_BUTTONS, /* Bits 7~11 */
+	CTRL_STICKX,
+	CTRL_STICKY,
+	CTRL_STICK2X,
+	CTRL_STICK2Y,
+	NUM_CTRL
+};
+uint8_t controler[NUM_CTRL];
+
+const MechanismConfig mech_configs[] =
+		{
+		/* type,         ctrl_idx,       btn_mask, 		target_idx,       ls_idx,          speed,            direction */
+		{ACT_SERVO,    CTRL_BUTTONS2,    0x20,     SM_CATCH_BUCKET,  LS_BUCKET_UP,     SERVO_HV_MAX,    0},
+		{ACT_SERVO,    CTRL_BUTTONS2,    0x02,     SM_CATCH_BUCKET,  LS_BUCKET_BOTTOM, SERVO_HV_REVMAX, 0},
+	    {ACT_MOTOR,    CTRL_BUTTONS2,    0x02,     M_BUCKET_UPDOWN,  LS_NONE,	       MOTOR_HARF,       0},
+		{ACT_MOTOR,    CTRL_BUTTONS2,    0x20,     M_BUCKET_UPDOWN,  LS_NONE,	       MOTOR_HARF,       1},
+	    {ACT_MOTOR,    CTRL_BUTTONS,     0x04,     M_SUPPLY_CLOTH,   LS_SUPPLY_UP,     MOTOR_HARF,       1},
+		{ACT_MOTOR,    CTRL_BUTTONS,     0x10,     M_SUPPLY_CLOTH,   LS_SUPPLY_BOTTOM, MOTOR_HARF,       0},
+	    {ACT_MOTOR,    CTRL_BUTTONS2,    0x40,     M_DESK,           LS_NONE,          MOTOR_MAX,       1},
+		{ACT_MACRO,    CTRL_BUTTONS2,    0x01,     S_FLAG,             0,             0,            0},
+		{ACT_MACRO,    CTRL_BUTTONS2,    0x10,     S_DESK,             0,             0,            0},
+
+
+	    /* Solenoids */
+		{ACT_SOLENOID, CTRL_BUTTONS2,    0x08,     S_LSUPER,         LS_NONE,          SOLENOID_ON,     0},
+	    {ACT_SOLENOID, CTRL_BUTTONS2,    0x04,     S_NORMAL,         LS_NONE,          SOLENOID_ON,     0},
+		{ACT_SOLENOID, CTRL_BUTTONS,     0x01,     S_RSUPER,         LS_NONE,          SOLENOID_ON,     0},
+		};
+
+#define NUM_MECH_CONFIGS (sizeof(mech_configs) / sizeof(MechanismConfig))
+
+uint8_t UART_rx[8];
+uint8_t count = 0;
+uint8_t UART_flag = 0;
+uint32_t preTick = 0;
+
+static uint8_t state = 0;
+static uint8_t supplyButton = 0;
+static int supplyDownTime = 0;
+
+int servo_close_time = 0;
+int servo_open_time = 0;
+
+static uint8_t motor_changed = 0;
+static uint8_t solenoid_changed = 0;
+static uint8_t servo_changed = 0;
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_USART2_UART_Init(void);
+static void MX_CAN1_Init(void);
+static void MX_USART1_UART_Init(void);
+static void MX_USART3_UART_Init(void);
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+void Debug(void) {
+	char buff[512];
+	int size =
+			snprintf(buff, sizeof(buff),
+					"CTRL:%02X %02X %02X %02X %02X %02X | M:[%2d,%d][%2d,%d][%2d,%d] | SOL:%d %d %d | SRV:[%4d,%4d] state :%d LS:%d %d %d time:%d supplyButton %d\r\n",
+					(unsigned int) controler[0], (unsigned int) controler[1],
+					(unsigned int) controler[2], (unsigned int) controler[3],
+					(unsigned int) controler[4], (unsigned int) controler[5],
+					(int) motor_PWM[0], (int) motor_DIR[0], (int) motor_PWM[1],
+					(int) motor_DIR[1], (int) motor_PWM[2], (int) motor_DIR[2],
+					(int) solenoid[0], (int) solenoid[1], (int) solenoid[2],
+					servo[0], servo[1],state,LS[LS_SUPPLY_MAX],LS[LS_SUPPLY_MID],LS[LS_SUPPLY_MIN],servo_close_time,supplyButton);
+
+	HAL_UART_Transmit_IT(&huart2, (uint8_t*) buff, size);
+
+}
+
+/*
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+    if (huart->Instance == USART3) {
+        if (UART_rx[count] == 0x80 && count == 0) {
+            count = 1;
+        } else if (count > 0) {
+            count++;
+            if (count >= 7) { // Header(1) + Data(6) = 7 byte
+                for (int i = 0; i < 6; i++) {
+                    controler[i] = UART_rx[i + 1];
+                }
+                count = 0;
+            }
+        } else {
+            count = 0;
+        }
+
+
+        //Setup reception for next byte
+        HAL_UART_Receive_IT(&huart3, &UART_rx[count], 1);
+	}
+}*/
+
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	if (huart->Instance == USART3) {
+
+		if (count == 0) {
+			if (UART_rx[count] == 0x80) {
+				count = 1;
+			}
+		} else if (count > 0) {
+			count++;
+			if (count >= 7) { //Header(1) + Data(6) = 7 bytes total
+				for (int i = 0; i < 6; i++) {
+					controler[i] = UART_rx[i + 1];
+				}
+				UART_flag = 1;
+
+				count = 0;
+			}
+		} else {
+			count = 0;
+		}
+		//Setup reception for next byte
+		HAL_UART_Receive_IT(&huart3, &UART_rx[count], 1);
+	}
+}
+
+/*
+ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+if (huart->Instance == USART3) {
+if (UART_rx[count] == 0x80 && count == 0) {
+	count = 1;
+} else if (count > 0) {
+	count++;
+	if (count >= 7) {
+		uint8_t sum = 0;
+		for (int i = 0; i < 7; i++) {
+			sum += UART_rx[count];
+			if ((uint8_t) (sum & 0x7F) == UART_rx[7]) {
+				UART_flag = 1;
+				for (int i = 0; i < 8; i++) {
+					controler[i] = UART_rx[i];
+				}
+			}
+		}
+	}
+} else {
+	count = 0;
+}
+//Setup reception for next byte
+HAL_UART_Receive_IT(&huart3, &UART_rx[count], sizeof(UART_rx[count]));
+}
+}*/
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+	CAN_RxHeaderTypeDef RxHeader;
+	uint8_t RxData[8];
+	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
+		if (RxHeader.StdId == LS_ID) {
+			for (int i = 0; i < 7 && i < NUM_LS; i++) {
+				LS[i] = RxData[i];
+			}
+		}
+	}
+}
+
+void can_transmit(uint32_t Id, uint8_t *pData, uint8_t length) {
+	CAN_TxHeaderTypeDef TxHeader;
+	uint32_t TxMailbox;
+	uint8_t TxData[8] = { 0 };
+
+	if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) > 0) {
+		TxHeader.StdId = Id;
+		TxHeader.RTR = CAN_RTR_DATA;
+		TxHeader.IDE = CAN_ID_STD;
+		TxHeader.DLC = 8;
+		TxHeader.TransmitGlobalTime = DISABLE;
+
+		for (int i = 0; i < length && i < 8; i++) {
+			TxData[i] = pData[i];
+		}
+
+		if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox)== HAL_OK) {
+			//HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); /* Toggle LED on transmission */
+		}
+	}
+}
+void initialize(){
+	/* 1. Clear current outputs for motors and solenoids */
+	for (int i = 0; i < NUM_MOTORS; i++) {
+		motor_PWM[i] = MOTOR_STOP;
+	}
+	for (int i = 0; i < NUM_SOLENOIDS; i++) {
+		solenoid[i] = SOLENOID_OFF;
+	}
+	servo[SM_CATCH_BUCKET] = SERVO_HV_STOP;
+}
+
+void judge(void) {
+
+	/* 2. Process mechanism configurations */
+	for (size_t i = 0; i < NUM_MECH_CONFIGS; i++) {
+		MechanismConfig cfg = mech_configs[i];
+
+		/* Check limit switch status */
+		uint8_t ls_pressed = (cfg.ls_idx != LS_NONE) ? LS[cfg.ls_idx] : 0;
+
+		if ((controler[cfg.ctrl_idx] & cfg.btn_mask) && (ls_pressed == 0)) {
+			if (cfg.type == ACT_MOTOR) {
+				motor_PWM[cfg.target_idx] = (uint8_t) cfg.speed;
+				motor_DIR[cfg.target_idx] = cfg.direction;
+			} else if (cfg.type == ACT_SOLENOID) {
+				solenoid[cfg.target_idx] = (uint8_t) cfg.speed;
+			} else if (cfg.type == ACT_SERVO) {
+				servo[cfg.target_idx] = cfg.speed;
+			} else if (cfg.type == ACT_MACRO) {
+				if (state == 0) {
+					state = 1;
+					if (cfg.target_idx == S_FLAG) {
+						supplyButton = 1;
+					} else if (cfg.target_idx == S_DESK) {
+						supplyButton = 2;
+					}
+				}
+			}
+		}
+	}
+}
+
+void transmit_data(){
+
+	/* 3. Check and transmit motor speed/direction updates */
+
+	for (int i = 0; i < NUM_MOTORS; i++) {
+		if (motor_PWM[i] != prev_motor_PWM[i] || motor_DIR[i] != prev_motor_DIR[i]) {
+			motor_changed = 1;
+			prev_motor_PWM[i] = motor_PWM[i];
+		}
+	}
+	if (motor_changed) {
+		uint8_t sendData[8] = { 0 };
+		for (int i = 0; i < NUM_MOTORS && i < 4; i++) {
+			sendData[i] = motor_PWM[i];
+			sendData[i + 4] = motor_DIR[i];
+		}
+		can_transmit(MOTOR_ID, sendData, 8);
+		motor_changed = 0;
+	}
+
+	/* 4. Check and transmit solenoid updates */
+
+	for (int i = 0; i < NUM_SOLENOIDS; i++) {
+		if (solenoid[i] != prev_solenoid[i]) {
+			solenoid_changed = 1;
+			prev_solenoid[i] = solenoid[i];
+		}
+	}
+	if (solenoid_changed) {
+		uint8_t sendData[8] = { 0 };
+		for (int i = 0; i < NUM_SOLENOIDS && i < 8; i++) {
+			sendData[i] = solenoid[i];
+		}
+		can_transmit(SOLENOID_ID, sendData, 8);
+		solenoid_changed = 0;
+	}
+
+	/* 5. Check and transmit servo updates */
+	for (int i = 0; i < NUM_SM; i++) {
+		if (servo[i] != prev_servo[i]) {
+			servo_changed = 1;
+			prev_servo[i] = servo[i];
+		}
+	}
+	if (servo_changed) {
+		uint8_t send[8] = {0};
+		send[0] = (uint8_t) (servo[SM_CATCH] >> 8);
+		send[1] = (uint8_t) (servo[SM_CATCH] & 0xFF);
+		send[2] = (uint8_t) (servo[SM_CATCH_BUCKET] >> 8);
+		send[3] = (uint8_t) (servo[SM_CATCH_BUCKET] & 0xFF);
+		can_transmit(SM_CATCH_ID, send, 8);
+		servo_changed = 0;
+	}
+
+	/* 6. ROBOMAS*/
+	uint8_t send[8] = {0};
+	send[0] = controler[CTRL_STICKX];
+	send[1] = controler[CTRL_STICKY];
+	send[2] = controler[CTRL_STICK2X];
+	can_transmit(ROBOMAS_ID, send, 8);
+
+}
+
+void Macro(uint8_t supplyData) {
+	switch (state) {
+	case 1:
+		//servo close
+		if(LS[LS_SUPPLY_MIN] == 1){
+			if(servo[SM_CATCH] == SERVO_80){
+				servo_close_time = HAL_GetTick();
+			}
+			servo[SM_CATCH] = SERVO_0;
+			if(HAL_GetTick() - servo_close_time > 2000){
+				supplyDownTime = HAL_GetTick();
+				state = 2;
+			}
+		}
+		break;
+	case 2:
+			motor_PWM[M_SUPPLY_CLOTH] = MOTOR_HARF;
+			motor_DIR[M_SUPPLY_CLOTH] = 0;
+		if (LS[LS_SUPPLY_BOTTOM] == 1) {
+			motor_PWM[M_SUPPLY_CLOTH] = MOTOR_STOP;
+			if(supplyData == 1){
+				state = 3;
+			}else {
+				state = 4;
+			}
+		}
+		break;
+	case 3:
+		//supply_LR
+		motor_PWM[M_SUPPLY_LR] = MOTOR_HARF;
+		motor_DIR[M_SUPPLY_LR] = 1;
+		if (LS[LS_SUPPLY_MID] == 1) {
+			motor_PWM[M_SUPPLY_LR] = MOTOR_STOP;
+			state = 5;
+			servo_open_time = HAL_GetTick();
+		}
+		break;
+	case 4:
+		motor_PWM[M_SUPPLY_LR] = MOTOR_HIGH;
+		motor_DIR[M_SUPPLY_LR] = 1;
+		if (LS[LS_SUPPLY_MAX] == 1) {
+			motor_PWM[M_SUPPLY_LR] = MOTOR_STOP;
+			state = 5;
+			servo_open_time = HAL_GetTick();
+		}
+		break;
+	case 5:
+		//servo open
+		servo[SM_CATCH] = SERVO_80;
+		if(HAL_GetTick() - servo_open_time >= 1000){
+			state = 6;
+		}
+		break;
+	case 6:
+		//supply_LR
+		/*
+		motor_PWM[M_SUPPLY_LR] = MOTOR_HARF;
+		motor_DIR[M_SUPPLY_LR] = 0;
+		motor_changed = 1;
+		state = 6;*/
+		motor_PWM[M_SUPPLY_LR] = MOTOR_HIGH;
+		motor_DIR[M_SUPPLY_LR] = 0;
+		if (LS[LS_SUPPLY_MIN] == 1) {
+			motor_PWM[M_SUPPLY_LR] = MOTOR_STOP;
+			state = 0;
+			supplyButton = 0;
+		}
+		break;
+	}
+}
+
+/* USER CODE END 0 */
+
+/**
+ * @brief  The application entry point.
+ * @retval int
+ */
+int main(void) {
+
+	/* USER CODE BEGIN 1 */
+
+	/* USER CODE END 1 */
+
+	/* MCU Configuration--------------------------------------------------------*/
+
+	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	HAL_Init();
+
+	/* USER CODE BEGIN Init */
+
+	/* USER CODE END Init */
+
+	/* Configure the system clock */
+	SystemClock_Config();
+
+	/* USER CODE BEGIN SysInit */
+
+	/* USER CODE END SysInit */
+
+	/* Initialize all configured peripherals */
+	MX_GPIO_Init();
+	MX_USART2_UART_Init();
+	MX_CAN1_Init();
+	MX_USART1_UART_Init();
+	MX_USART3_UART_Init();
+	/* USER CODE BEGIN 2 */
+	//HAL_UART_Receive_IT(&huart3, &UART_rx[count], sizeof(UART_rx[count]));
+	HAL_UART_Receive_IT(&huart3,&UART_rx[0], 1);
+	HAL_CAN_Start(&hcan1);
+	HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+	/* USER CODE END 2 */
+
+	/* Infinite loop */
+	/* USER CODE BEGIN WHILE */
+	while (1) {
+		initialize();
+		if (UART_flag == 1) {
+			UART_flag = 0;
+			HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); /* Toggle LED on transmission */
+
+
+			if (HAL_GetTick() - preTick > TICK_INTERVAL) {
+				preTick = HAL_GetTick();
+				judge();
+				if (state >= 1) {
+					Macro(supplyButton);
+				}
+				transmit_data();
+				Debug();
+			}
+		}
+
+
+		/* USER CODE END WHILE */
+
+		/* USER CODE BEGIN 3 */
+	}
+	/* USER CODE END 3 */
+}
+
+/**
+ * @brief System Clock Configuration
+ * @retval None
+ */
+void SystemClock_Config(void) {
+	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
+
+	/** Configure the main internal regulator output voltage
+	 */
+	__HAL_RCC_PWR_CLK_ENABLE();
+	__HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+
+	/** Initializes the RCC Oscillators according to the specified parameters
+	 * in the RCC_OscInitTypeDef structure.
+	 */
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+	RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+	RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+		Error_Handler();
+	}
+
+	/** Initializes the CPU, AHB and APB buses clocks
+	 */
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
+			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK) {
+		Error_Handler();
+	}
+}
+
+/**
+ * @brief CAN1 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_CAN1_Init(void) {
+
+	/* USER CODE BEGIN CAN1_Init 0 */
+
+	/* USER CODE END CAN1_Init 0 */
+
+	/* USER CODE BEGIN CAN1_Init 1 */
+
+	/* USER CODE END CAN1_Init 1 */
+	hcan1.Instance = CAN1;
+	hcan1.Init.Prescaler = 1;
+	hcan1.Init.Mode = CAN_MODE_NORMAL;
+	hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
+	hcan1.Init.TimeSeg1 = CAN_BS1_5TQ;
+	hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
+	hcan1.Init.TimeTriggeredMode = DISABLE;
+	hcan1.Init.AutoBusOff = ENABLE;
+	hcan1.Init.AutoWakeUp = ENABLE;
+	hcan1.Init.AutoRetransmission = ENABLE;
+	hcan1.Init.ReceiveFifoLocked = DISABLE;
+	hcan1.Init.TransmitFifoPriority = DISABLE;
+	if (HAL_CAN_Init(&hcan1) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN CAN1_Init 2 */
+	CAN_FilterTypeDef filter;
+	filter.FilterIdHigh = 0x300 << 5; /* Filter ID upper 16-bit */
+	filter.FilterIdLow = 0; /* Filter ID lower 16-bit */
+	filter.FilterMaskIdHigh = 0x7FF << 5; /* Filter mask upper 16-bit */
+	filter.FilterMaskIdLow = 0; /* Filter mask lower 16-bit */
+	filter.FilterScale = CAN_FILTERSCALE_32BIT; /* 32-bit mode */
+	filter.FilterFIFOAssignment = CAN_FILTER_FIFO0; /* Assign to FIFO0 */
+	filter.FilterBank = 0;
+	filter.FilterMode = CAN_FILTERMODE_IDMASK; /* Identifier mask mode */
+	filter.SlaveStartFilterBank = 14;
+	filter.FilterActivation = ENABLE;
+
+	HAL_CAN_ConfigFilter(&hcan1, &filter);
+	/* USER CODE END CAN1_Init 2 */
+
+}
+
+/**
+ * @brief USART1 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_USART1_UART_Init(void) {
+
+	/* USER CODE BEGIN USART1_Init 0 */
+
+	/* USER CODE END USART1_Init 0 */
+
+	/* USER CODE BEGIN USART1_Init 1 */
+
+	/* USER CODE END USART1_Init 1 */
+	huart1.Instance = USART1;
+	huart1.Init.BaudRate = 115200;
+	huart1.Init.WordLength = UART_WORDLENGTH_8B;
+	huart1.Init.StopBits = UART_STOPBITS_1;
+	huart1.Init.Parity = UART_PARITY_NONE;
+	huart1.Init.Mode = UART_MODE_TX_RX;
+	huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart1) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN USART1_Init 2 */
+
+	/* USER CODE END USART1_Init 2 */
+
+}
+
+/**
+ * @brief USART2 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_USART2_UART_Init(void) {
+
+	/* USER CODE BEGIN USART2_Init 0 */
+
+	/* USER CODE END USART2_Init 0 */
+
+	/* USER CODE BEGIN USART2_Init 1 */
+
+	/* USER CODE END USART2_Init 1 */
+	huart2.Instance = USART2;
+	huart2.Init.BaudRate = 115200;
+	huart2.Init.WordLength = UART_WORDLENGTH_8B;
+	huart2.Init.StopBits = UART_STOPBITS_1;
+	huart2.Init.Parity = UART_PARITY_NONE;
+	huart2.Init.Mode = UART_MODE_TX_RX;
+	huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart2) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN USART2_Init 2 */
+
+	/* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+ * @brief USART3 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_USART3_UART_Init(void) {
+
+	/* USER CODE BEGIN USART3_Init 0 */
+
+	/* USER CODE END USART3_Init 0 */
+
+	/* USER CODE BEGIN USART3_Init 1 */
+
+	/* USER CODE END USART3_Init 1 */
+	huart3.Instance = USART3;
+	huart3.Init.BaudRate = 115200;
+	huart3.Init.WordLength = UART_WORDLENGTH_8B;
+	huart3.Init.StopBits = UART_STOPBITS_1;
+	huart3.Init.Parity = UART_PARITY_NONE;
+	huart3.Init.Mode = UART_MODE_TX_RX;
+	huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+	if (HAL_UART_Init(&huart3) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN USART3_Init 2 */
+
+	/* USER CODE END USART3_Init 2 */
+
+}
+
+/**
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_GPIO_Init(void) {
+	GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+	/* USER CODE BEGIN MX_GPIO_Init_1 */
+
+	/* USER CODE END MX_GPIO_Init_1 */
+
+	/* GPIO Ports Clock Enable */
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	__HAL_RCC_GPIOH_CLK_ENABLE();
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+
+	/*Configure GPIO pin : B1_Pin */
+	GPIO_InitStruct.Pin = B1_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+	/*Configure GPIO pin : LD2_Pin */
+	GPIO_InitStruct.Pin = LD2_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+
+	/* USER CODE BEGIN MX_GPIO_Init_2 */
+
+	/* USER CODE END MX_GPIO_Init_2 */
+}
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
+
+/**
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
+void Error_Handler(void) {
+	/* USER CODE BEGIN Error_Handler_Debug */
+	/* User can add his own implementation to report the HAL error return state */
+	__disable_irq();
+	while (1) {
+	}
+	/* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */

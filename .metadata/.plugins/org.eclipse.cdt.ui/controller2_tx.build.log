@@ -1,0 +1,10 @@
+13:30:46 **** Build of configuration Debug for project controller2_tx ****
+make -j18 all 
+arm-none-eabi-size  controller2_tx.elf 
+   text	   data	    bss	    dec	    hex	filename
+  16940	    104	   2256	  19300	   4b64	controller2_tx.elf
+Finished building: default.size.stdout
+ 
+
+13:30:47 Build Finished. 0 errors, 0 warnings. (took 747ms)
+

@@ -1,0 +1,81 @@
+13:30:51 **** Build of configuration Debug for project robomas_474re ****
+make -j18 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_NUCLEO_64 -DUSE_HAL_DRIVER -DSTM32G474xx -c -I../Core/Inc -I../Drivers/STM32G4xx_HAL_Driver/Inc -I../Drivers/STM32G4xx_HAL_Driver/Inc/Legacy -I../Drivers/BSP/STM32G4xx_Nucleo -I../Drivers/CMSIS/Device/ST/STM32G4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'HAL_CAN_RxFifo0MsgPendingCallback':
+../Core/Src/main.c:88:5: error: unknown type name 'CAN_RxHeaderTypeDef'; did you mean 'FDCAN_RxHeaderTypeDef'?
+   88 |     CAN_RxHeaderTypeDef RxHeader;
+      |     ^~~~~~~~~~~~~~~~~~~
+      |     FDCAN_RxHeaderTypeDef
+../Core/Src/main.c:90:9: error: implicit declaration of function 'HAL_CAN_GetRxMessage'; did you mean 'HAL_FDCAN_GetRxMessage'? [-Wimplicit-function-declaration]
+   90 |     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
+      |         ^~~~~~~~~~~~~~~~~~~~
+      |         HAL_FDCAN_GetRxMessage
+../Core/Src/main.c:90:30: error: 'hcan' undeclared (first use in this function); did you mean 'hfdcan'?
+   90 |     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
+      |                              ^~~~
+      |                              hfdcan
+../Core/Src/main.c:90:30: note: each undeclared identifier is reported only once for each function it appears in
+../Core/Src/main.c:90:36: error: 'CAN_RX_FIFO0' undeclared (first use in this function); did you mean 'FDCAN_RX_FIFO0'?
+   90 |     if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) == HAL_OK) {
+      |                                    ^~~~~~~~~~~~
+      |                                    FDCAN_RX_FIFO0
+../Core/Src/main.c:91:21: error: request for member 'IDE' in something not a structure or union
+   91 |         if (RxHeader.IDE == CAN_ID_STD) {
+      |                     ^
+../Core/Src/main.c:91:29: error: 'CAN_ID_STD' undeclared (first use in this function)
+   91 |         if (RxHeader.IDE == CAN_ID_STD) {
+      |                             ^~~~~~~~~~
+../Core/Src/main.c:92:37: error: request for member 'StdId' in something not a structure or union
+   92 |             uint32_t rxId = RxHeader.StdId;
+      |                                     ^
+../Core/Src/main.c:95:35: error: 'CAN1' undeclared (first use in this function)
+   95 |             if (hcan->Instance == CAN1) {
+      |                                   ^~~~
+../Core/Src/main.c:102:40: error: 'CAN2' undeclared (first use in this function); did you mean 'FDCAN2'?
+  102 |             else if (hcan->Instance == CAN2) {
+      |                                        ^~~~
+      |                                        FDCAN2
+../Core/Src/main.c: In function 'transmit_robomas':
+../Core/Src/main.c:121:5: error: unknown type name 'CAN_TxHeaderTypeDef'; did you mean 'FDCAN_TxHeaderTypeDef'?
+  121 |     CAN_TxHeaderTypeDef TxHeader;
+      |     ^~~~~~~~~~~~~~~~~~~
+      |     FDCAN_TxHeaderTypeDef
+../Core/Src/main.c:125:13: error: implicit declaration of function 'HAL_CAN_GetTxMailboxesFreeLevel'; did you mean 'HAL_FDCAN_GetTxFifoFreeLevel'? [-Wimplicit-function-declaration]
+  125 |     if( 0 < HAL_CAN_GetTxMailboxesFreeLevel(&hcan2) && HAL_GetTick() - pre_transmit >= 10 ){
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |             HAL_FDCAN_GetTxFifoFreeLevel
+../Core/Src/main.c:125:46: error: 'hcan2' undeclared (first use in this function); did you mean 'hfdcan2'?
+  125 |     if( 0 < HAL_CAN_GetTxMailboxesFreeLevel(&hcan2) && HAL_GetTick() - pre_transmit >= 10 ){
+      |                                              ^~~~~
+      |                                              hfdcan2
+../Core/Src/main.c:127:17: error: request for member 'StdId' in something not a structure or union
+  127 |         TxHeader.StdId = 0x200;
+      |                 ^
+../Core/Src/main.c:128:17: error: request for member 'RTR' in something not a structure or union
+  128 |         TxHeader.RTR = CAN_RTR_DATA;
+      |                 ^
+../Core/Src/main.c:128:24: error: 'CAN_RTR_DATA' undeclared (first use in this function); did you mean 'SAI_xDR_DATA'?
+  128 |         TxHeader.RTR = CAN_RTR_DATA;
+      |                        ^~~~~~~~~~~~
+      |                        SAI_xDR_DATA
+../Core/Src/main.c:129:17: error: request for member 'IDE' in something not a structure or union
+  129 |         TxHeader.IDE = CAN_ID_STD;
+      |                 ^
+../Core/Src/main.c:129:24: error: 'CAN_ID_STD' undeclared (first use in this function)
+  129 |         TxHeader.IDE = CAN_ID_STD;
+      |                        ^~~~~~~~~~
+../Core/Src/main.c:130:17: error: request for member 'DLC' in something not a structure or union
+  130 |         TxHeader.DLC = 8;
+      |                 ^
+../Core/Src/main.c:131:17: error: request for member 'TransmitGlobalTime' in something not a structure or union
+  131 |         TxHeader.TransmitGlobalTime = DISABLE;
+      |                 ^
+../Core/Src/main.c:143:12: error: implicit declaration of function 'HAL_CAN_AddTxMessage'; did you mean 'HAL_FDCAN_GetRxMessage'? [-Wimplicit-function-declaration]
+  143 |         if(HAL_CAN_AddTxMessage(&hcan2, &TxHeader, TxData, &TxMailbox) != HAL_OK){
+      |            ^~~~~~~~~~~~~~~~~~~~
+      |            HAL_FDCAN_GetRxMessage
+make: *** [Core/Src/subdir.mk:34: Core/Src/main.o] Error 1
+"make -j18 all" terminated with exit code 2. Build might be incomplete.
+
+13:30:53 Build Failed. 21 errors, 0 warnings. (took 2s.9ms)
+
